@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
 
 // DB connection
 const {mongoose} = require('./db/mongoose');
@@ -48,6 +49,23 @@ app.get('/todos', (req, res) => {
 
     );
 
+});
+
+// GET request --- get single todo --- /todos/todo1
+app.get('/todos/:id', (req, res) => {
+    let id = req.params.id;
+
+    if (ObjectID.isValid(id) === false) {
+        res.status(404).send({result: "ID is invalid"});
+    } else {
+        Todo.findById(id).then((todo) => {
+            if (todo === null) {
+                res.send({});
+            }
+
+            res.send({todo});
+        });
+    }
 });
 
 app.listen(3000, () => {
