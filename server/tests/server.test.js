@@ -4,14 +4,26 @@ const request = require('supertest');
 const {app} = require('./../server');
 const {Todo} = require("./../model/todo");
 
+// Dummy data
+const todos = [
+    {text: "First todo"},
+    {text: "Second todo"}
+];
+
 // Testing lifecycle method
 // Do something before the test cases are executed.
 // Only will run the test case after done is called
 beforeEach((done) => {
     // Delete all data in todos collection
     Todo.deleteMany({}).then(() => {
-        done();
-    });
+
+        return Todo.insertMany(todos);
+
+    }).then(
+        () => {
+            done();
+        }
+    );
 });
 
 describe('POST /todos', () => {
@@ -42,8 +54,8 @@ describe('POST /todos', () => {
                             return done(err);
                         }
 
-                        expect(todos.length).toBe(1);
-                        expect(todos[0].text).toBe(text);
+                        expect(todos.length).toBe(3);
+                        expect(todos[2].text).toBe(text);
                         done();
                     }
                 );
@@ -62,10 +74,25 @@ describe('POST /todos', () => {
             expect(res.body).toEqual({});
 
             Todo.countDocuments({}, (err, count) => {
-                expect(count).toBe(0);
+                expect(count).toBe(2);
                 done();
             });
 
         });
     });
+});
+
+describe("GET /todos", () => {
+
+    it('Should get all todos', (done) => {
+        request(app)
+        .get('/todos')
+        .expect((res) => {
+            expect(res.body.length).toBe(2);
+        }).end((err, res) => {
+            expect(res.body.todos[0]).toInclude(todos[0]);
+            done();
+        });
+    });
+
 });

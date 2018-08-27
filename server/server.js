@@ -34,6 +34,7 @@ app.post('/todos', (req, res) => {
 
 });
 
+// GET request -- get all todos from db
 app.get('/todos', (req, res) => {
 
     Todo.find().then(
