@@ -1,13 +1,15 @@
 const expect = require('expect');
 const request = require('supertest');
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Todo} = require("./../model/todo");
 
 // Dummy data
+// new ObjectID() method generates a random id automatically.
 const todos = [
-    {text: "First todo"},
-    {text: "Second todo"}
+    {_id: new ObjectID(), text: "First todo"},
+    {_id: new ObjectID(), text: "Second todo"}
 ];
 
 // Testing lifecycle method
@@ -93,6 +95,34 @@ describe("GET /todos", () => {
             expect(res.body.todos[0]).toInclude(todos[0]);
             done();
         });
+    });
+
+});
+
+describe("Get /todos/{id}", () => {
+
+    it('Should get one todo with the provided id', (done) => {
+        request(app)
+        .get(`/todos/${todos[0]._id.toHexString()}`) // convert the _id object into a string
+        .expect(200)
+        .end(
+            (err, res) => {
+                expect(res.body.todo.text).toBe(todos[0].text);
+                done();
+            }
+        )
+    });
+
+    it('Should return nothing if todo not found', (done) => {
+        request(app)
+            .get(`/todos/${new ObjectID().toHexString()}`)
+            .expect(404)
+            .end(
+                (err, res) => {
+                    expect(res.body).toEqual({});
+                    done();
+                }
+            )
     });
 
 });

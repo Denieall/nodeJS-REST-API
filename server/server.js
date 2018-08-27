@@ -60,10 +60,10 @@ app.get('/todos/:id', (req, res) => {
     } else {
         Todo.findById(id).then((todo) => {
             if (todo === null) {
-                res.send({});
+                res.status(404).send({});
+            } else {
+                res.send({todo});
             }
-
-            res.send({todo});
         });
     }
 });
