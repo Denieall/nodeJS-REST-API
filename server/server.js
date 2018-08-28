@@ -11,6 +11,8 @@ const {User} = require('./model/user');
 
 let app = express();
 
+const port = process.env.PORT || 3000;
+
 // Creating middleware to use body parse to post json POST request
 app.use(bodyParser.json());
 
@@ -68,8 +70,8 @@ app.get('/todos/:id', (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log("http://localhost:3000");
+app.listen(port, () => {
+    console.log("App started on port: " + port);
 });
 
 
