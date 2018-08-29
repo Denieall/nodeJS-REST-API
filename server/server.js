@@ -1,3 +1,5 @@
+let {env} = require('./config/config');
+
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -12,10 +14,17 @@ const {User} = require('./model/user');
 
 let app = express();
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 // Creating middleware to use body parse to post json POST request
 app.use(bodyParser.json());
+
+// Allow CORS
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
 // POST request -- create new todos in database
 app.post('/todos', (req, res) => {
@@ -140,6 +149,7 @@ app.patch('/todos/:id', (req, res) => {
 
 
 app.listen(port, () => {
+    console.log(env + " environment");
     console.log("App started on port: " + port);
 });
 
