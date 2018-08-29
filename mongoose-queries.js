@@ -11,6 +11,9 @@ if (ObjectID.isValid(id) === false || ObjectID.isValid(user_id) === false) {
     throw new Error("ID not valid");
 }
 
+// ------------------------------------------------------------------------------------------
+// fetch data
+// ------------------------------------------------------------------------------------------
 // Mongoose will automatically convert id into new ObjectID('5b838dc68f92790a28fd9ca1')
 Todo.find({_id: id}).then(
     (todos) => {
@@ -67,3 +70,32 @@ User.findById(user_id).then(
         console.log("User", user);
     }
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

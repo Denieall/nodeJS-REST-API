@@ -70,6 +70,31 @@ app.get('/todos/:id', (req, res) => {
     }
 });
 
+// TODO: Remove a todo
+app.delete('/todos/:id', (req, res) => {
+    let id = req.params.id;
+
+    if (ObjectID.isValid(id) === false) {
+        res.status(404).send({result: "ID is invalid"});
+    } else {
+
+        Todo.findByIdAndDelete(id).then(
+            (todo) => {
+                if (todo === null) {
+                    res.status(404).send("No documents with that id");
+                } else {
+                    res.send({todo});
+                }
+            },
+
+            (err) => {
+                res.send("Unable to delete");
+            }
+        );
+
+    }
+});
+
 app.listen(port, () => {
     console.log("App started on port: " + port);
 });
