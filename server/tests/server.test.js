@@ -9,7 +9,7 @@ const {Todo} = require("./../model/todo");
 // new ObjectID() method generates a random id automatically.
 const todos = [
     {_id: new ObjectID(), text: "First todo"},
-    {_id: new ObjectID(), text: "Second todo"}
+    {_id: new ObjectID(), text: "Second todo", completed: true, completedAt: 333}
 ];
 
 // Testing lifecycle method
@@ -163,4 +163,59 @@ describe('DELETE /todos/{id}', () => {
 
     });
 
+});
+
+describe("PATCH /todos/{id}", () => {
+
+    it('Should update the todo', (done) => {
+
+        let payload = {text: "First todo completed", completed: true};
+
+        request(app)
+        .patch("/todos/" + todos[0]._id.toHexString())
+        .send(payload)
+        .expect(200)
+        .end(
+            (err, res) => {
+                Todo.findById(todos[0]._id.toHexString()).then(
+                    (todo) => {
+                        expect(todo).toInclude(payload);
+                        done();
+                    }
+                ).catch(
+                    (err) => {
+                        done(err);
+                    }
+                );
+            }
+        );
+
+    });
+
+    it('Should clear completedAt when todo is not completed', (done) => {
+
+        let payload = {text: "Second todo not completed", completed: false};
+
+        request(app)
+        .patch('/todos/' + todos[1]._id.toHexString())
+        .send(payload)
+        .expect(200)
+        .end(
+            (err, res) => {
+
+                Todo.findById(todos[1]._id.toHexString()).then(
+                    (todo) => {
+                        expect(todo.completedAt).toBe(null);
+                        done();
+                    }
+                ).catch(
+                    (err) => {
+                        done(err);
+                    }
+                );
+
+            }
+        );
+
+    });
 });
