@@ -26,6 +26,10 @@ app.use(function(req, res, next) {
     next();
 });
 
+// -----------------------------------------------------------------------------------------------
+// Todos route
+// -----------------------------------------------------------------------------------------------
+
 // POST request -- create new todos in database
 app.post('/todos', (req, res) => {
 
@@ -147,6 +151,27 @@ app.patch('/todos/:id', (req, res) => {
     }
 });
 
+// -----------------------------------------------------------------------------------------------
+// Users route
+// -----------------------------------------------------------------------------------------------
+app.post('/users', (req, res) => {
+    let body = _.pick(req.body, ['email', 'password']);
+    let user = new User(body);
+
+    user.save().then(
+        () => {
+            return user.generateAuthToken();
+        }
+    ).then(
+        (token) => {
+            res.header('x-auth', token).send(user);
+        }
+    ).catch(
+        (err) => {
+            res.status(400).send(err);
+        }
+    );
+});
 
 app.listen(port, () => {
     console.log(env + " environment");
