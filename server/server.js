@@ -12,6 +12,9 @@ const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./model/todo');
 const {User} = require('./model/user');
 
+// Middleware
+const {authenticate} = require('./middleware/authenticate');
+
 let app = express();
 
 const port = process.env.PORT;
@@ -154,6 +157,10 @@ app.patch('/todos/:id', (req, res) => {
 // -----------------------------------------------------------------------------------------------
 // Users route
 // -----------------------------------------------------------------------------------------------
+
+// res.header() --- set a header value
+// req.header() --- get a header value
+
 app.post('/users', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
     let user = new User(body);
@@ -171,6 +178,14 @@ app.post('/users', (req, res) => {
             res.status(400).send(err);
         }
     );
+});
+
+// Using middleware to authenticate token
+// Does middleware first if pass then do the actual request callback method
+app.get('/users/me', authenticate, (req, res) => {
+
+    res.send(req.user);
+
 });
 
 app.listen(port, () => {

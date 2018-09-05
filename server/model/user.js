@@ -44,6 +44,9 @@ let UserSchema = new mongoose.Schema({
     ]
 });
 
+// UserSchema.methods == instance methods
+// UserSchema.statics == model methods
+
 // Overriding the existing function in mongoose
 // to JSON run when res.send() is called
 UserSchema.methods.toJSON = function () {
@@ -68,6 +71,27 @@ UserSchema.methods.generateAuthToken = function () {
             return token;
         }
     );
+};
+
+UserSchema.statics.findByToken = function (token) {
+
+    let decoded;
+
+    try {
+        decoded = jwt.verify(token, 'bearWHS99');
+    } catch (e) {
+
+        // return new Promise((resolve, reject) => {
+        //     reject(e);
+        // });
+
+        return Promise.reject(); // same as comment above
+    }
+
+    return this.findOne({
+        '_id': decoded._id,
+        'tokens': {$elemMatch : {token: token , access: 'auth'}} // how to query nested arrays
+    });
 };
 
 let User = mongoose.model('User', UserSchema);
