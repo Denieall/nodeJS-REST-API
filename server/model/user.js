@@ -2,6 +2,7 @@ const validator = require('validator');
 const {mongoose} = require('./../db/mongoose');
 const jwt = require("jsonwebtoken");
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 // ------------------------------------------------------------------------------------
 //  Model for user collection
@@ -13,7 +14,7 @@ let UserSchema = new mongoose.Schema({
     email: {
         type: String,
         minlength: 1,
-        require:true,
+        required:true,
         trim: true,
         unique: true,
         validate: {
@@ -93,6 +94,63 @@ UserSchema.statics.findByToken = function (token) {
         'tokens': {$elemMatch : {token: token , access: 'auth'}} // how to query nested arrays
     });
 };
+
+UserSchema.statics.findByCredentials = function (email, password) {
+
+    return User.findOne({email}).then(
+        (user) => {
+
+            if (!user) {
+                return Promise.reject("Invalid email");
+            }
+
+            // If some method dont support promise wrap it in (new Promise)
+            return new Promise((resolve, reject) => {
+
+                bcrypt.compare(password, user.password, (err, bool) => {
+
+                    if (err) {
+                        reject("Error");
+                    }
+
+                    if (bool) {
+                        resolve(user.tokens[0].token);
+                    } else {
+                        reject("Invalid password");
+                    }
+
+                });
+
+            });
+
+        }
+    );
+
+};
+
+// Setting up pre Mongoose Middleware
+// Run some code before saving a document to db
+// this middleware is for hashing the password before inserting into db
+UserSchema.pre('save', function (next) {
+
+    if (this.isModified('password')) {
+
+        bcrypt.genSalt(10, (err, salt) => {
+
+            bcrypt.hash(this.password, salt, (err, hash) => {
+
+                this.password = hash;
+                next();
+
+            });
+
+        });
+
+    } else {
+        next();
+    }
+
+});
 
 let User = mongoose.model('User', UserSchema);
 
