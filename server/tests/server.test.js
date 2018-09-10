@@ -5,28 +5,13 @@ const {ObjectID} = require('mongodb');
 const {app} = require('./../server');
 const {Todo} = require("./../model/todo");
 
-// Dummy data
-// new ObjectID() method generates a random id automatically.
-const todos = [
-    {_id: new ObjectID(), text: "First todo"},
-    {_id: new ObjectID(), text: "Second todo", completed: true, completedAt: 333}
-];
+const {todos, populateTodos, populateUsers, users} = require('./seed/seed');
 
 // Testing lifecycle method
 // Do something before the test cases are executed.
 // Only will run the test case after done is called
-beforeEach((done) => {
-    // Delete all data in todos collection
-    Todo.deleteMany({}).then(() => {
-
-        return Todo.insertMany(todos);
-
-    }).then(
-        () => {
-            done();
-        }
-    );
-});
+beforeEach(populateTodos);
+beforeEach(populateUsers);
 
 describe('POST /todos', () => {
 
@@ -35,6 +20,7 @@ describe('POST /todos', () => {
 
         request(app)
         .post('/todos')
+        .set('x-auth', users[0].tokens[0].token) // setting header
         .send({text})
         .expect(200)
         .expect(
@@ -89,8 +75,9 @@ describe("GET /todos", () => {
     it('Should get all todos', (done) => {
         request(app)
         .get('/todos')
+        .set('x-auth', users[0].tokens[0].token) // setting header
         .expect((res) => {
-            expect(res.body.length).toBe(2);
+            expect(res.body.todos.length).toBe(1);
         }).end((err, res) => {
             expect(res.body.todos[0]).toInclude(todos[0]);
             done();

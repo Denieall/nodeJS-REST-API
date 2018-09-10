@@ -35,11 +35,12 @@ app.use(function(req, res, next) {
 // -----------------------------------------------------------------------------------------------
 
 // POST request -- create new todos in database
-app.post('/todos', (req, res) => {
+app.post('/todos', authenticate, (req, res) => {
 
     // Creating new object from class (modal)
     let todo = new Todo({
-        text: req.body.text
+        text: req.body.text,
+        _creator: req.user._id
     });
 
     // Saving the object into db
@@ -56,9 +57,9 @@ app.post('/todos', (req, res) => {
 });
 
 // GET request -- get all todos from db
-app.get('/todos', (req, res) => {
+app.get('/todos', authenticate, (req, res) => {
 
-    Todo.find().then(
+    Todo.find({_creator: req.user._id}).then(
         (todos) => {
             res.send({todos});
         },
